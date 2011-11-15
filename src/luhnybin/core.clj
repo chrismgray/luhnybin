@@ -27,49 +27,49 @@
 (defn replace-digits
   "Takes a (reversed) string, an index, and a number of digits to replace.
    Returns the string with num-digits digits replaced by Xs starting at idx."
-  [s idx num-digits]
-  (str (apply str (vec (take idx s))) ; take returns a lazy sequence, so force it with vec
+  [s [first-idx last-idx]]
+  (str (apply str (vec (take first-idx s))) ; take returns a lazy sequence, so force it with vec
        (apply str
-        (first (reduce (fn [[s num-found] idx]
-                         (if (= num-found num-digits)
-                           [s num-found]
-                           [(assoc s idx (if (digit? (s idx))
-                                           \X
-                                           (s idx)))
-                            (if (digit? (s idx))
-                              (inc num-found)
-                              num-found)]))
-                       [(vec (subs s idx)) 0]
-                       (range (count (subs s idx))))))))
+              (reduce (fn [s letter]
+                        (if (digit? letter)
+                          (conj s \X)
+                          (conj s letter)))
+                      []
+                      (vec (subs s first-idx (inc last-idx)))))
+       (subs s (inc last-idx))))
 
 (defn handle-string-at-index
   "Takes a (reversed) string and an index.  If the next 14, 15, or 16 digits
-   (possibly separated by spaces or dashes) pass the Luhn check, replace the
-   digits by Xs and return the string."
+   (possibly separated by spaces or dashes) pass the Luhn check, return a vector
+   of the index in the string and the last index in the string which contains a
+   digit that passes the Luhn check.  Otherwise, return nil."
   [s idx]
   (let [digits
         (->> s
              (#(subs % idx))
-             (take-while #(or (digit? %) (separator? %)))
-             (remove separator?)
+             (map-indexed #(vector %2 (+ idx %1)))
+             (take-while #(or (digit? (first %)) (separator? (first %))))
+             (remove (comp separator? first))
              (take 16)
-             (map digit->int))]
+             (map (fn [[dig i]] [(digit->int dig) i])))]
     (if (< (count digits) 14)
-      s
+      nil
       (cond
-       (luhn-check (take 14 digits))
-       (replace-digits s idx 14)
-       (luhn-check (take 15 digits))
-       (replace-digits s idx 15)
-       (luhn-check (take 16 digits))
-       (replace-digits s idx 16)
+       (and (>= (count digits) 16) (luhn-check (map first (take 16 digits))))
+       [idx (second (last digits))]
+       (and (>= (count digits) 15) (luhn-check (map first (take 15 digits))))
+       [idx (second (last (take 15 digits)))]
+       (luhn-check (map first (take 14 digits)))
+       [idx (second (last (take 14 digits)))]
        :else
-       s))))
+       nil))))
 
 (defn handle-input-line
   "Takes a line of input and replaces the possible credit-card numbers with Xs."
   [line]
-  (reduce handle-string-at-index (apply str (reverse line)) (range (count line))))
+  (let [line (apply str (reverse line))
+        replace-between-indexes (remove nil? (map handle-string-at-index (repeat line) (range (count line))))]
+    (reduce replace-digits line replace-between-indexes)))
 
 (defn handle-input-lines
   "Takes multiple lines of input and replaces all the possible credit-card numbers with Xs"
@@ -77,4 +77,10 @@
   (map #(apply str (reverse %)) (map handle-input-line (string/split-lines lines))))
 
 (defn -main [& args]
-  (doall (map println (handle-input-lines (slurp *in*)))))
+  (let [not-empty (atom true)]
+    (while @not-empty
+      (let [line (read-line)]
+        (if (empty? line)
+          (swap! not-empty not)
+          (println (apply str (reverse (handle-input-line line)))))))))
+
