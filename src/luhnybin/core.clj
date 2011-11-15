@@ -23,8 +23,9 @@
   (Integer/parseInt (str char)))
 
 (defn replace-digits
-  "Takes a (reversed) string, an index, and a number of digits to replace.
-   Returns the string with num-digits digits replaced by Xs starting at idx."
+  "Takes a (reversed) string, and a pair with first and last indices
+   of a number that passes the Luhn test.  Replaces all the digits in
+   the string between these two indices with Xs."
   [s [first-idx last-idx]]
   (str (apply str (vec (take first-idx s))) ; take returns a lazy sequence, so force it with vec
        (apply str
