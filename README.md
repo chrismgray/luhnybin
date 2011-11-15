@@ -69,3 +69,10 @@ This isn't a contest, but an innovative solution could score you interviews at S
 Once we have enough interesting submissions, I'll summarize the results in a followup [blog](http://corner.squareup.com/) post and open source our own Java-based implementation. In the mean time, if you enjoy working with talented people on challenging problems like this, email your résumé to <a href="mailto:luhnybin@squareup.com">luhnybin@squareup.com</a>.
 
 Good luck!
+
+Compiling the clojure version
+-----------------------------
+
+1. Install clojure and [https://github.com/technomancy/leiningen](lein)
+1. Run `lein dep; lein uberjar`
+1. Run `./run.sh`
