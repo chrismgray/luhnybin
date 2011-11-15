@@ -73,6 +73,6 @@ Good luck!
 Compiling the clojure version
 -----------------------------
 
-1. Install clojure and [https://github.com/technomancy/leiningen](lein)
+1. Install clojure and [lein](https://github.com/technomancy/leiningen)
 1. Run `lein dep; lein uberjar`
 1. Run `./run.sh`
