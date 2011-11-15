@@ -50,18 +50,14 @@
              (take-while #(or (digit? (first %)) (separator? (first %))))
              (remove (comp separator? first))
              (take 16)
-             (map (fn [[dig i]] [(digit->int dig) i])))]
-    (if (< (count digits) 14)
+             (map (fn [[dig i]] [(digit->int dig) i])))
+        num-digits (count digits)]
+    (if (< num-digits 14)
       nil
-      (cond
-       (and (>= (count digits) 16) (luhn-check (map first (take 16 digits))))
-       [idx (second (last digits))]
-       (and (>= (count digits) 15) (luhn-check (map first (take 15 digits))))
-       [idx (second (last (take 15 digits)))]
-       (luhn-check (map first (take 14 digits)))
-       [idx (second (last (take 14 digits)))]
-       :else
-       nil))))
+      (some identity
+            (map (fn [num]
+                   (when (and (>= num-digits num) (luhn-check (map first (take num digits))))
+                     [idx (second (last (take num digits)))])) '(16 15 14))))))
 
 (defn handle-input-line
   "Takes a line of input and replaces the possible credit-card numbers with Xs."
