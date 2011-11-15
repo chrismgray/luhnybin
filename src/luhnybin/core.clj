@@ -13,8 +13,6 @@
        (#(mod % 10))
        (= 0)))
 
-(luhn-check (reverse [5 6 7 8]))
-
 (defn digit? [char]
   (contains? (set "0123456789") char))
 
@@ -70,11 +68,6 @@
   (let [line (apply str (reverse line))
         replace-between-indexes (remove nil? (map handle-string-at-index (repeat line) (range (count line))))]
     (reduce replace-digits line replace-between-indexes)))
-
-(defn handle-input-lines
-  "Takes multiple lines of input and replaces all the possible credit-card numbers with Xs"
-  [lines]
-  (map #(apply str (reverse %)) (map handle-input-line (string/split-lines lines))))
 
 (defn -main [& args]
   (let [not-empty (atom true)]
